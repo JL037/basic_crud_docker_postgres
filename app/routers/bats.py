@@ -24,14 +24,14 @@ def search_bats(
 def create_bat(bat: schemas.BatCreate, db: Session = Depends(get_db)):
     return bat_service.create(db=db, obj_in=bat)
 
-router.get("/{bat_id}", response_model=schemas.Bat)
+@router.get("/{bat_id}", response_model=schemas.Bat)
 def get_bat(bat_id: int, db: Session = Depends(get_db)):
     bat = bat_service.get(db=db, obj_id=bat_id)
     if not bat:
         raise HTTPException(status_code=404, detail="Bat not found")
     return bat
 
-router.get("/wood", response_model=List[schemas.Bat])
+@router.get("/wood", response_model=List[schemas.Bat])
 def get_wood_bats(db: Session = Depends(get_db)):
     return bat_service.search(db=db, is_wood=True)
 
