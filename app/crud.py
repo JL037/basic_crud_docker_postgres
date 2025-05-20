@@ -23,3 +23,17 @@ class BatService:
 
     def get(self, db: Session, obj_id: int):
         return db.query(models.Bat).filter(models.Bat.id == obj_id).first()
+    
+    def update(self, db: Session, db_obj: models.Bat, obj_in: schemas.BatCreate):
+        data = obj_in.model_dump()
+        for field, value in data.items():
+            setattr(db_obj, field, value)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+    
+    def remove(self, db: Session, obj_id: int):
+        db_obj = db.query(models.Bat).filter(models.Bat.id == obj_id).first()
+        if db_obj:
+            db.delete(db_obj)
+            db.commit()

@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException
 from app.database import get_db
 from typing import List, Optional
 from app import schemas
 from sqlalchemy.orm import Session
 from app.crud import BatService
 
-router = FastAPI(
+router = APIRouter(
     prefix="/bats",
     tags=["Bats"]
 )
@@ -26,7 +26,7 @@ def create_bat(bat: schemas.BatCreate, db: Session = Depends(get_db)):
 
 router.get("/{bat_id}", response_model=schemas.Bat)
 def get_bat(bat_id: int, db: Session = Depends(get_db)):
-    bat = bat_service.get(db=db, obj_in=bat_id)
+    bat = bat_service.get(db=db, obj_id=bat_id)
     if not bat:
         raise HTTPException(status_code=404, detail="Bat not found")
     return bat
@@ -41,14 +41,14 @@ def get_metal_bats(db: Session = Depends(get_db)):
 
 @router.put("/{bat_id}", response_model=schemas.Bat)
 def update_bat(bat_id: int, bat_update: schemas.BatCreate, db: Session = Depends(get_db)):
-    existing = bat_service.get(db=db, obj_in=bat_id)
+    existing = bat_service.get(db=db, obj_id=bat_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Bat not found")
     return bat_service.update(db=db, db_obj=existing, obj_in=bat_update)
 
 @router.delete("/{bat_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_bat(bat_id: int, db: Session = Depends(get_db)):
-    existing = bat_service.get(db=db, obj_in=bat_id)
+    existing = bat_service.get(db=db, obj_id=bat_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Bat not found")
-    return bat_service.remove(db=db, obj_in=bat_id)
+    return bat_service.remove(db=db, obj_id=bat_id)
