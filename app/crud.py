@@ -1,30 +1,31 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app import models, schemas
+from app.schemas import bat
+from app.models import bats
 
 class BatService:
     def search(self, db: Session, brand: str | None = None, is_wood: bool | None = None):
-        query = db.query(models.Bat)
+        query = db.query(bats.Bat)
 
         if brand is not None:
-            query = query.filter(models.Bat.brand.ilike(f"%{brand}%"))
+            query = query.filter(bats.Bat.brand.ilike(f"%{brand}%"))
 
         if is_wood is not None:
-            query = query.filter(models.Bat.is_wood == is_wood)
+            query = query.filter(bats.Bat.is_wood == is_wood)
 
         return query.all()
     
-    def create(self, db: Session, obj_in: schemas.BatCreate):
-        db_bat = models.Bat(**obj_in.model_dump())
+    def create(self, db: Session, obj_in: bat.BatCreate):
+        db_bat = bats.Bat(**obj_in.model_dump())
         db.add(db_bat)
         db.commit()
         db.refresh(db_bat)
         return db_bat
 
     def get(self, db: Session, obj_id: int):
-        return db.query(models.Bat).filter(models.Bat.id == obj_id).first()
+        return db.query(bats.Bat).filter(bats.Bat.id == obj_id).first()
     
-    def update(self, db: Session, db_obj: models.Bat, obj_in: schemas.BatCreate):
+    def update(self, db: Session, db_obj: bats.Bat, obj_in: bat.BatCreate):
         data = obj_in.model_dump()
         for field, value in data.items():
             setattr(db_obj, field, value)
@@ -33,7 +34,7 @@ class BatService:
         return db_obj
     
     def remove(self, db: Session, obj_id: int):
-        db_obj = db.query(models.Bat).filter(models.Bat.id == obj_id).first()
+        db_obj = db.query(bats.Bat).filter(bats.Bat.id == obj_id).first()
         if db_obj:
             db.delete(db_obj)
             db.commit()
