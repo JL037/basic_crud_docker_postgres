@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.crud import BatService
 from app.dependencies.auth import get_current_user
 from app.models.user import User
+from app.dependencies.auth import require_admin
 
 router = APIRouter(
     prefix="/bats",
@@ -59,7 +60,7 @@ def update_bat(bat_id: int, bat_update: bat.BatCreate, db: Session = Depends(get
     return bat_service.update(db=db, db_obj=existing, obj_in=bat_update)
 
 @router.delete("/{bat_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_bat(bat_id: int, db: Session = Depends(get_db)):
+def delete_bat(bat_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     existing = bat_service.get(db=db, obj_id=bat_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Bat not found")

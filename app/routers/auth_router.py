@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.schemas.user import UserRead, UserCreate
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.database import get_db
 from app.utils.security import hash_password, verify_password, create_access_token
 from sqlalchemy.exc import IntegrityError
@@ -22,7 +22,8 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
     new_user = User(
         email=user_data.email,
-        hashed_password=hashed_pw
+        hashed_password=hashed_pw,
+        role=user_data.role
     )
 
     try:

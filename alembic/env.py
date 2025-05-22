@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 from app.database import Base
 from app.models import bats
+from app.models import user
 import os
 
 DATABASE_URL = os.getenv("DATABASE_URL")

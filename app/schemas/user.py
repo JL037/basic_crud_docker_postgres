@@ -1,14 +1,17 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 from datetime import datetime
-
+from app.models.user import UserRole
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
+    role: Optional[UserRole] = UserRole.USER
 
 class UserRead(BaseModel):
     id: int
     email: EmailStr
     created_at: datetime
+    role: UserRole
 
     class Config:
         from_attributes = True
