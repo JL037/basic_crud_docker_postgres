@@ -7,7 +7,7 @@ from app.crud import BatService
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.dependencies.auth import require_admin
-
+from app.utils.validators import parse_bool_param, parse_brand_param
 router = APIRouter(
     prefix="/bats",
     tags=["Bats"],
@@ -23,16 +23,10 @@ def search_bats(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    is_wood_bool = None
-    if is_wood is not None:
-        if is_wood.lower() in ["true", "1"]:
-            is_wood_bool = True
-        elif is_wood.lower() in ["false", "0"]:
-            is_wood_bool = False
-        else:
-            raise HTTPException(status_code=400, detail="Invalid value for is_wood. Use true/false")
-        
-    return bat_service.search(db=db, brand=brand, is_wood=is_wood)
+    brand_clean = parse_brand_param(brand)
+    is_wood_bool = parse_bool_param(is_wood, field_name="is_wood")
+    return bat_service.search(db=db, brand=brand_clean, is_wood=is_wood_bool)
+
 
 @router.post("/", response_model=bat.Bat, status_code=status.HTTP_201_CREATED)
 def create_bat(bat: bat.BatCreate, db: Session = Depends(get_db)):
