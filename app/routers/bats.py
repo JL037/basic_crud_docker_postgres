@@ -7,7 +7,7 @@ from app.crud import BatService
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.dependencies.auth import require_admin
-from app.utils.validators import parse_bool_param, parse_brand_param
+from app.utils.validators import parse_bool_param, parse_brand_param, validate_order_by, validate_order_dir, ALLOWED_ORDER_FIELDS, parse_filters
 router = APIRouter(
     prefix="/bats",
     tags=["Bats"],
@@ -20,12 +20,27 @@ bat_service = BatService()
 def search_bats(
     brand: str | None = None,
     is_wood: Optional[str] = Query(default=None),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+    min_price: float | None = Query(default=None, ge=0),
+    max_price: float | None = Query(default=None, ge=0),
+    order_by: str = Query(default="price"),
+    order_dir: str = Query(default="asc"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    brand_clean = parse_brand_param(brand)
-    is_wood_bool = parse_bool_param(is_wood, field_name="is_wood")
-    return bat_service.search(db=db, brand=brand_clean, is_wood=is_wood_bool)
+    
+    filters = parse_filters(brand, is_wood, order_by, order_dir)
+
+    return bat_service.search(
+    db=db,
+    skip=skip,
+    limit=limit,
+    min_price=min_price,
+    max_price=max_price,
+    **filters
+)
+
 
 
 @router.post("/", response_model=bat.Bat, status_code=status.HTTP_201_CREATED)
@@ -37,7 +52,7 @@ def get_wood_bats(db: Session = Depends(get_db)):
     return bat_service.search(db=db, is_wood=True)
 
 @router.get("/metal", response_model=List[bat.Bat])
-def get_metal_bats(db: Session = Depends(get_db)):
+def get_metal_bats(db: Session = Depends(get_db), ):
     return bat_service.search(db=db, is_wood=False)
 
 @router.get("/{bat_id}", response_model=bat.Bat)
